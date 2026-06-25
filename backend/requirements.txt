@@ -1,0 +1,24 @@
+# DocuMind AI v2 — Backend Requirements
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.12
+
+# LLM
+groq>=0.11.0
+
+# RAG Stack
+langchain>=0.2.0
+langchain-community>=0.2.0
+langchain-text-splitters>=0.2.0
+faiss-cpu>=1.8.0
+sentence-transformers>=2.7.0
+
+# PDF
+pypdf>=4.2.0
+
+# Web Search
+duckduckgo-search>=6.0.0
+
+# DB & Utils
+python-dotenv>=1.0.0
+numpy>=1.26.0
