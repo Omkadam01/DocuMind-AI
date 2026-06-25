@@ -1,292 +1,199 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/DocuMind_AI-Production_RAG_Platform-0ea5e9?style=for-the-badge&logo=brain&logoColor=white" />
+<h1>DocuMind AI</h1>
 
-<h1>🧠 DocuMind AI</h1>
-
-<p><strong>Production-grade AI document intelligence platform for PDF question answering, built with RAG architecture.</strong></p>
+<p>Production-grade AI document intelligence platform for conversational PDF question answering, built on Retrieval-Augmented Generation architecture.</p>
 
 <p>
-  <img src="https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react" />
-  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi" />
-  <img src="https://img.shields.io/badge/Groq-LLaMA_3.3_70B-f55036?style=flat-square" />
-  <img src="https://img.shields.io/badge/FAISS-Vector_Search-orange?style=flat-square" />
-  <img src="https://img.shields.io/badge/LangChain-RAG-1c3144?style=flat-square" />
-  <img src="https://img.shields.io/badge/SQLite-Persistence-003b57?style=flat-square&logo=sqlite" />
-</p>
-
-<p>
-  <a href="#demo">Demo</a> ·
-  <a href="#features">Features</a> ·
-  <a href="#architecture">Architecture</a> ·
-  <a href="#quickstart">Quick Start</a> ·
-  <a href="#deployment">Deployment</a>
+  <img src="https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react&logoColor=white" />
+  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white" />
+  <img src="https://img.shields.io/badge/Groq-LLaMA_3.3_70B-f55036?style=flat-square&logoColor=white" />
+  <img src="https://img.shields.io/badge/FAISS-Vector_Search-orange?style=flat-square&logoColor=white" />
+  <img src="https://img.shields.io/badge/LangChain-RAG_Pipeline-1c3144?style=flat-square&logoColor=white" />
+  <img src="https://img.shields.io/badge/SQLite-Persistence-003b57?style=flat-square&logo=sqlite&logoColor=white" />
 </p>
 
 </div>
 
 ---
 
-## 📌 Overview
+## Overview
 
-DocuMind AI is a full-stack Retrieval-Augmented Generation (RAG) application that enables intelligent conversations with PDF documents. Users can upload multiple PDFs, ask natural language questions, and receive AI-generated answers with **exact page citations** and optional **live web search augmentation** — all in a Perplexity-style chat interface.
+DocuMind AI allows users to upload PDF documents and ask natural language questions against their contents. The system retrieves relevant passages using vector similarity search and generates grounded answers using Groq's LLaMA 3.3 70B model — with exact page number citations and optional live web search augmentation.
 
-Built as a production-grade portfolio project demonstrating end-to-end AI engineering: from document ingestion and vector indexing to LLM orchestration, REST API design, and modern frontend development.
-
----
-
-## ✨ Features
-
-| Feature | Description |
-|---|---|
-| 📚 Multi-PDF RAG | Upload and query multiple PDFs simultaneously per session |
-| 📍 Page Citations | Every answer references exact source page numbers |
-| 💬 Persistent Sessions | Named chat sessions stored in SQLite — survive restarts |
-| 🌐 Web Search | DuckDuckGo integration augments answers with live results |
-| ⚡ Groq LLaMA 3.3 70B | Ultra-fast inference, 100% free — no billing required |
-| 🔍 FAISS Vector Search | Balanced per-document retrieval with cosine similarity |
-| 🎨 Perplexity-style UI | React + Framer Motion — animations, typewriter streaming |
-| 🔌 REST API | FastAPI backend with full Swagger documentation at `/docs` |
-| 🐳 Docker Ready | `docker-compose` for one-command local deployment |
-| 📤 Drag & Drop Upload | PDF upload directly in the chat sidebar |
-| 📋 Copy & Export | Copy answers, export full sessions as `.docx` |
+The project is structured as a decoupled full-stack application: a FastAPI backend handling all RAG logic and a React frontend delivering a Perplexity-style conversational interface. Chat sessions and message history are persisted in SQLite so conversations survive server restarts.
 
 ---
 
-## 🏗️ Architecture
+## Features
+
+- **Multi-document RAG** — upload and query multiple PDFs simultaneously within a single session
+- **Page-level citations** — every answer references the exact source page numbers from the original PDF
+- **Persistent sessions** — named chat sessions stored in SQLite; history is retained across restarts
+- **Web search augmentation** — optional DuckDuckGo integration supplements document answers with live results
+- **Balanced retrieval** — FAISS search distributes retrieval fairly across all uploaded documents, preventing any single file from dominating results
+- **Conversational memory** — six-turn context window maintains coherent multi-turn dialogue
+- **Typewriter streaming** — answers render progressively in the UI, consistent with modern AI chat interfaces
+- **Drag-and-drop upload** — PDFs uploaded directly from the chat sidebar with live indexing progress
+- **REST API** — fully documented FastAPI backend with Swagger UI available at `/docs`
+
+---
+
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    React Frontend                        │
-│         Vite · Tailwind · Framer Motion · Zustand       │
-└──────────────────────┬──────────────────────────────────┘
-                       │ HTTP REST (Axios)
-                       ▼
-┌─────────────────────────────────────────────────────────┐
-│                  FastAPI Backend                         │
-│                                                         │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────┐  │
-│  │  PyPDF   │  │LangChain │  │  FAISS   │  │ Groq  │  │
-│  │  Parser  │→ │ Chunker  │→ │  Index   │→ │  LLM  │  │
-│  └──────────┘  └──────────┘  └──────────┘  └───────┘  │
-│                                                         │
-│  ┌──────────────┐  ┌─────────────────────────────────┐ │
-│  │   SQLite     │  │  DuckDuckGo Web Search          │ │
-│  │  (sessions + │  │  (optional augmentation)        │ │
-│  │   messages)  │  └─────────────────────────────────┘ │
-│  └──────────────┘                                       │
-└─────────────────────────────────────────────────────────┘
+React Frontend (Vite + Tailwind + Framer Motion)
+        |
+        | HTTP REST via Axios
+        |
+FastAPI Backend
+        |
+        |-- PyPDF          PDF parsing with page-level text extraction
+        |-- LangChain      Document chunking (350 tokens, 15% overlap)
+        |-- HuggingFace    Sentence embeddings (all-MiniLM-L6-v2)
+        |-- FAISS          In-memory vector index and similarity search
+        |-- Groq           LLaMA 3.3 70B inference
+        |-- DuckDuckGo     Optional web search augmentation
+        |-- SQLite         Session and message persistence
 ```
 
-### RAG Pipeline
+**RAG Pipeline**
 
 ```
-PDF Upload → Text Extraction (PyPDF) → Chunking (LangChain, 350 tokens)
-    → Embedding (HuggingFace MiniLM-L6) → FAISS Index
+PDF Upload
+  → Text extraction per page (PyPDF)
+  → Recursive character chunking (LangChain, 350 tokens)
+  → Sentence embedding (MiniLM-L6-v2, 384 dimensions)
+  → FAISS index (cosine similarity, per-document balanced retrieval)
 
-Query → Embedding → Balanced Search (per-doc retrieval)
-    → Context Assembly → Groq LLaMA 3.3 70B → Answer + Citations
+Query
+  → Embed query
+  → Balanced search across all documents (4 chunks per PDF)
+  → Assemble context with source and relevance metadata
+  → Prompt construction with 6-turn conversation history
+  → Groq LLaMA 3.3 70B inference
+  → Response with page citations and source attribution
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 **Frontend**
-- React 18 + Vite
-- Tailwind CSS — dark glassmorphism theme
-- Framer Motion — page transitions, message animations, typewriter effect
-- Zustand — lightweight global state
-- React Markdown — full markdown + table rendering
-- React Dropzone — drag-and-drop PDF upload
-- Lucide React — icon system
-- Axios — HTTP client
+
+| Technology | Purpose |
+|---|---|
+| React 18 + Vite | UI framework and build tooling |
+| Tailwind CSS | Utility-first styling, dark glassmorphism theme |
+| Framer Motion | Message animations, sidebar transitions, typewriter effect |
+| Zustand | Lightweight global state management |
+| React Markdown | Markdown and table rendering in chat responses |
+| React Dropzone | Drag-and-drop PDF upload interface |
+| Axios | HTTP client with interceptors and error handling |
 
 **Backend**
-- FastAPI — async REST API
-- LangChain — document chunking and RAG orchestration
-- FAISS — CPU vector store with similarity search
-- HuggingFace `sentence-transformers/all-MiniLM-L6-v2` — embeddings
-- Groq API — LLaMA 3.3 70B inference
-- PyPDF — PDF parsing with page-level text extraction
-- DuckDuckGo Search — free web augmentation
-- SQLite — session and message persistence
-- Python-dotenv — environment management
 
-**DevOps**
-- Docker + docker-compose — containerized local deployment
-- Railway — backend hosting
-- Vercel — frontend hosting
-- GitHub Actions ready
+| Technology | Purpose |
+|---|---|
+| FastAPI | Async REST API with automatic OpenAPI documentation |
+| LangChain | Document chunking and RAG orchestration |
+| FAISS (CPU) | Vector store for embedding similarity search |
+| HuggingFace Transformers | `sentence-transformers/all-MiniLM-L6-v2` embeddings |
+| Groq API | LLaMA 3.3 70B inference — free tier, no billing required |
+| PyPDF | PDF parsing with page-level text extraction |
+| DuckDuckGo Search | Zero-cost web augmentation |
+| SQLite | Session and message persistence |
 
 ---
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- Free Groq API key → [console.groq.com](https://console.groq.com)
-
-### 1. Clone
-```bash
-git clone https://github.com/Om-Jagtap/DocuMind-AI.git
-cd DocuMind-AI
-```
-
-### 2. Backend Setup
-```bash
-cd backend
-
-# Create virtual environment
-python -m venv venv
-venv\Scripts\activate       # Windows
-# source venv/bin/activate  # Mac/Linux
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure environment
-cp .env.example .env
-# Edit .env → add your GROQ_API_KEY
-
-# Run backend
-uvicorn main:app --reload --port 8000
-```
-Backend: **http://localhost:8000**  
-API Docs: **http://localhost:8000/docs**
-
-### 3. Frontend Setup
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Configure environment
-cp .env.example .env.local
-# .env.local already points to http://localhost:8000
-
-# Run frontend
-npm run dev
-```
-Frontend: **http://localhost:3000**
-
----
-
-## 🌐 Deployment
-
-### Backend → Railway (Free)
-
-1. Push this repo to GitHub
-2. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub
-3. Select the `backend/` directory as root
-4. Add environment variable: `GROQ_API_KEY=your_key`
-5. Railway auto-detects the `Procfile` and deploys
-6. Copy your Railway URL: `https://documind-ai-backend.up.railway.app`
-
-### Frontend → Vercel (Free)
-
-1. Go to [vercel.com](https://vercel.com) → New Project → Import GitHub repo
-2. Set **Root Directory** to `frontend`
-3. Framework preset: **Vite**
-4. Add environment variable:
-   ```
-   VITE_API_URL = https://your-railway-backend-url.up.railway.app
-   ```
-5. Deploy → get your public URL instantly
-
-### Docker (Self-hosted)
-```bash
-# From project root
-cp .env.example .env  # add GROQ_API_KEY
-docker-compose up --build
-```
-
----
-
-## 📡 API Reference
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/health` | Health check |
-| `POST` | `/sessions/create` | Create new chat session |
-| `GET` | `/sessions` | List all sessions |
-| `GET` | `/sessions/{id}/messages` | Get chat history |
-| `DELETE` | `/sessions/{id}` | Delete session |
-| `PATCH` | `/sessions/{id}/rename` | Rename session |
-| `POST` | `/sessions/{id}/upload` | Upload & index PDFs |
-| `GET` | `/sessions/{id}/documents` | List indexed documents |
-| `POST` | `/ask` | Ask a question (RAG) |
-
-Full interactive documentation: **[Backend URL]/docs**
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 DocuMind-AI/
+│
 ├── backend/
-│   ├── main.py              # FastAPI application — all RAG logic
-│   ├── requirements.txt     # Python dependencies
-│   ├── Dockerfile           # Container definition
-│   ├── railway.toml         # Railway deployment config
-│   ├── Procfile             # Process definition for PaaS
-│   └── .env.example         # Environment template
+│   ├── main.py                 FastAPI application — all RAG logic
+│   ├── requirements.txt        Python dependencies
+│   ├── Dockerfile              Container definition
+│   ├── railway.toml            Railway deployment configuration
+│   ├── Procfile                Process definition for PaaS platforms
+│   └── .env.example            Environment variable template
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx                    # Root component + routing
-│   │   ├── main.jsx                   # React entry point
-│   │   ├── index.css                  # Global styles + Tailwind
+│   │   ├── App.jsx             Root component and layout
+│   │   ├── main.jsx            React entry point
+│   │   ├── index.css           Global styles and Tailwind directives
 │   │   ├── components/
-│   │   │   ├── Sidebar.jsx            # Sessions, upload, settings
-│   │   │   ├── ChatArea.jsx           # Main chat interface
-│   │   │   ├── Message.jsx            # Message bubble + citations
-│   │   │   └── WelcomeScreen.jsx      # Landing / empty state
+│   │   │   ├── Sidebar.jsx     Session management, PDF upload, settings
+│   │   │   ├── ChatArea.jsx    Primary chat interface and input
+│   │   │   ├── Message.jsx     Message rendering, citations, web results
+│   │   │   └── WelcomeScreen.jsx   Empty state and feature overview
 │   │   └── lib/
-│   │       ├── api.js                 # Axios API client
-│   │       └── store.js               # Zustand global state
+│   │       ├── api.js          Axios API client
+│   │       └── store.js        Zustand global state store
 │   ├── index.html
 │   ├── package.json
 │   ├── vite.config.js
 │   ├── tailwind.config.js
-│   ├── vercel.json          # Vercel deployment config
-│   └── .env.example         # Environment template
+│   ├── vercel.json             Vercel deployment configuration
+│   └── .env.example            Environment variable template
 │
-├── docker-compose.yml       # Full-stack local deployment
+├── docker-compose.yml          Full-stack local deployment
 ├── .gitignore
 └── README.md
 ```
 
 ---
 
-## 🔬 Key Technical Decisions
+## Local Setup
 
-**Why Groq over OpenAI/Gemini?**
-Free tier with no billing required, 100x faster inference than alternatives, production-grade API reliability.
+**Prerequisites:** Python 3.10+, Node.js 18+, free Groq API key from [console.groq.com](https://console.groq.com)
 
-**Why FAISS over ChromaDB?**
-Zero external dependencies, runs entirely in-memory, no server process required, faster for document-scale workloads.
+**Backend**
 
-**Why FastAPI + React over Streamlit?**
-Clean separation of concerns, proper REST API enables any frontend (mobile, web, CLI), industry-standard architecture for production systems.
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate          # Windows
+source venv/bin/activate       # Mac / Linux
+pip install -r requirements.txt
+cp .env.example .env           # add GROQ_API_KEY
+uvicorn main:app --reload --port 8000
+```
 
-**Why SQLite over PostgreSQL?**
-Zero-config persistence ideal for single-instance deployment, no external database service needed, sufficient for session/message storage at this scale.
+**Frontend**
+
+```bash
+cd frontend
+npm install
+cp .env.example .env.local     # VITE_API_URL=http://localhost:8000
+npm run dev
+```
+
+Frontend: `http://localhost:3000`  
+Backend API docs: `http://localhost:8000/docs`
 
 ---
 
-## 👨‍💻 Author
+## Key Design Decisions
 
-**Om Jagtap**  
-B.Tech — Artificial Intelligence & Data Science  
-Sanjivani University, Maharashtra
+**Groq over OpenAI / Gemini** — Free tier with no billing, significantly faster inference, and sufficient context window for multi-document RAG at this scale.
 
-[![GitHub](https://img.shields.io/badge/GitHub-Om--Jagtap-181717?style=flat-square&logo=github)](https://github.com/Om-Jagtap)
+**FAISS over ChromaDB** — In-memory operation with no external server process, simpler dependency surface, and adequate performance for document-scale workloads.
+
+**Balanced per-document retrieval** — Standard top-k FAISS search allows larger documents to dominate results. The custom retrieval strategy enforces equal chunk allocation per PDF, ensuring multi-document comparisons are factually grounded across all sources.
+
+**Page-level extraction** — Text is extracted and indexed with page metadata at ingestion time, enabling citations to reference exact source pages rather than approximate locations.
+
+**FastAPI + React over Streamlit** — Proper REST API separation allows the frontend to be replaced or extended independently, and reflects production engineering practice more accurately for portfolio and hiring purposes.
+
+**SQLite over PostgreSQL** — Zero-configuration persistence appropriate for single-instance deployment. Session and message data volumes at this scale do not justify an external database service.
 
 ---
 
-## ⭐ If this project helped you, consider giving it a star!
+## Author
+
+**Om Kadam**  
+B.Tech — Artificial Intelligence & Data Science, Sanjivani University
 
